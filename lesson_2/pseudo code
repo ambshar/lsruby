@@ -1,0 +1,21 @@
+Get integer1
+Get integer2
+
+Add the two integers:  integer1 + integer2
+
+
+
+START
+
+GET integer1
+
+SET integer1
+
+GET integer2
+
+SET integer2
+
+Add  integer1 + integer2
+
+PRINT result
+

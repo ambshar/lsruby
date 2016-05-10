@@ -1,0 +1,31 @@
+# calculator_messages.yml
+en:
+  welcome: "Welcome to Calculator! Enter your name:"
+  greeting: "Hello "
+  valid_name: "Make sure to enter a valid name."
+  first_number: "Enter the first number"
+  second_number: "Plz enter the second number"
+  invalid_number: "The number is invalid.  Try again"
+  invalid_operator: "The operator choice is invalid.  Try again.  Choose from 1, 2, 3 or 4."
+  ask_again: "Would you like to try again?  Enter y or n."
+  sign_off: "Thanks for using the calculator "
+  operation: "What operation would you like to perform?  Press\n
+    1 to add\n
+    2 to subtract\n
+    3 to multiply or\n
+    4 to divide"
+es:
+  welcome: "Bienvenido a la calculadora! Entre su nombre:"
+  greeting: "Hello "
+  valid_name: "Asegúrese de entrar un nombre válido."
+  first_number: "Enter the first number"
+  second_number: "Plz enter the second number"
+  invalid_number: "The number is invalid.  Try again"
+  invalid_operator: "The operator choice is invalid.  Try again.  Choose from 1, 2, 3 or 4."
+  ask_again: "Would you like to try again?  Enter y or n."
+  sign_off: "Thanks for using the calculator "
+  operation: "What operation would you like to perform?  Press\n
+    1 to add\n
+    2 to subtract\n
+    3 to multiply or\n
+    4 to divide"
