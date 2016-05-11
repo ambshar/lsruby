@@ -1,4 +1,3 @@
-require 'pry'
 VALID_CHOICES = %w(rock paper scissors spock lizard)
 VALID_SHORT_FORMS = {
   "r" => "rock",
