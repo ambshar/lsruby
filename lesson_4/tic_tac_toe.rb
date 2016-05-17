@@ -68,17 +68,17 @@ def get_computer_choice(brd, squares_available)
   player_choices = brd.select { |_, v| v == PLAYER_MARKER }.keys
   computer_choices = brd.select { |_, v| v == COMPUTER_MARKER }.keys
 
-  likely_spot = find_square_for_next_move(brd, computer_choices,
+  likely_spot ||= find_square_for_next_move(brd, computer_choices,
                                           PLAYER_MARKER) # offense
-  return likely_spot if likely_spot
 
-  likely_spot = find_square_for_next_move(brd, player_choices,
+  likely_spot ||= find_square_for_next_move(brd, player_choices,
                                           COMPUTER_MARKER) # defense
-  return likely_spot if likely_spot
 
-  return 5 if (brd[5] != PLAYER_MARKER) && (brd[5] != COMPUTER_MARKER)
+  likely_spot ||= 5 if (brd[5] != PLAYER_MARKER) && (brd[5] != COMPUTER_MARKER)
 
-  squares_available.sample
+  likely_spot ||= squares_available.sample
+
+  return likely_spot
 end
 
 def computer_chooses!(brd, squares_available)
@@ -89,7 +89,7 @@ def computer_chooses!(brd, squares_available)
   puts "Computer chose the square #{computer_choice}"
 end
 
-def board_full(squares_available)
+def board_full?(squares_available)
   squares_available.empty?
 end
 
@@ -117,7 +117,7 @@ def play_the_game(current_player, brd, squares_available)
 end
 
 def game_over?(brd, squares_available)
-  board_full(squares_available) || someone_won?(brd)
+  board_full?(squares_available) || someone_won?(brd)
 end
 
 def alternate_player(current_player)
@@ -166,8 +166,11 @@ loop do # main loop asking you want to play again?
 
   if someone_won?(board)
     prompt "#{detect_winner(board)} won"
-    detect_winner(board) == 'Player' ? player_win_count += 1 : +
-                             computer_win_count += 1
+    if detect_winner(board) == 'Player' 
+      player_win_count += 1
+    else
+      computer_win_count += 1
+    end
   else
     prompt "It's a tie"
   end
