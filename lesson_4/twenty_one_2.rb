@@ -1,4 +1,5 @@
 
+require 'pry'
 SUIT = ['Diamonds', 'Clubs', 'Hearts', 'Spades'].freeze
 VALUES = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10',
           'J', 'Q', 'K'].freeze
@@ -51,12 +52,11 @@ def ace_check(hand)
 end
 
 def busted?(sum)
-  return true if sum > WHATEVER_ONE
-  false
+  sum > WHATEVER_ONE
 end
 
 def show_cards(hand)
-  hand.map { |e| e.join('-') }.join(' ')
+  hand.map { |value_suit| value_suit.join('-') }.join(' ')
 end
 
 def show_dealer_initial_hand(dealer_cards)
@@ -106,22 +106,23 @@ def show_results(player_sum, dealer_sum)
   end
 end
 
-def show_message(hand, sum, belongs_to)
-  if belongs_to.downcase.start_with?('p')
+def show_message(hand, sum, belongs_2)
+  if belongs_2.downcase.start_with?('p')
     prompt "You have: #{show_cards(hand)} worth #{sum}"
   else
     prompt "Dealer has: #{show_cards(hand)} worth #{sum}"
   end
 end
 
-def win_tracker(player_sum, dealer_sum, player_wins, dealer_wins)
+def win_tracker(player_sum, dealer_sum)
   result = get_winner(player_sum, dealer_sum)
-
+  wins = {}
   if result == :player || result == :dealer_busted
-    player_wins << 1
+    wins[:plyr] = 1
   elsif result == :dealer || result == :player_busted
-    dealer_wins << 1
+    wins[:dlr] = 1
   end
+  wins
 end
 
 def game_over?(player, dealer)
@@ -137,7 +138,16 @@ def play_again?
     break if choice.start_with?('y', 'n')
     prompt "Enter valid choice y or n"
   end
-  choice == 'y' ? true : false
+  choice.start_with?('y') ? true : false
+end
+
+def winning_message(tally)
+  winner = tally.max_by {|_, score| score}[0].to_s
+  if winner.start_with?('p')
+    prompt "You WIN the game by #{tally[:plyr]} to #{tally[:dlr]}"
+  else
+    prompt "Dealer wins by #{tally[:dlr]} to #{tally[:plyr]}"
+  end
 end
 
 def goodbye
@@ -148,21 +158,13 @@ end
 prompt "Welcome to Twenty - One.  Here are the cards"
 player_wins = []
 dealer_wins = []
+tally_wins = {plyr: 0, dlr: 0}
 
 loop do
   player_cards = []
   dealer_cards = []
   deck = []
 
-  if game_over?(player_wins, dealer_wins)
-    winner = player_wins.count > dealer_wins.count ? 'player' : 'dealer'
-    if winner == 'player'
-      prompt "You WIN the game by #{player_wins.count} to #{dealer_wins.count}"
-    else
-      prompt "Dealer wins by #{dealer_wins.count} to #{player_wins.count}"
-    end
-    break
-  end
 
   deck = shuffle_deck
   deal_initial_hand(player_cards, dealer_cards, deck)
@@ -193,13 +195,13 @@ loop do
   if busted?(player_sum)
     show_final_hands(player_cards, dealer_cards)
     show_results(player_sum, dealer_sum)
-    win_tracker(player_sum, dealer_sum, player_wins, dealer_wins)
-
-    if game_over?(player_wins, dealer_wins)
-      next
+    win = win_tracker(player_sum, dealer_sum)
+    tally_wins.merge!(win) { |_, score1, score2| score1 + score2 }
+    if tally_wins.has_value?(5)
+      winning_message(tally_wins)
+      break
     else
-      prompt "Your win count is #{player_wins.count} vs
-               #{dealer_wins.count} for dealer"
+      prompt "Your wins: #{tally_wins[:plyr]} vs #{tally_wins[:dlr]} for dealer"
       play_again? ? next : break
     end
   end
@@ -217,24 +219,26 @@ loop do
   if busted?(dealer_sum)
     show_final_hands(player_cards, dealer_cards)
     show_results(player_sum, dealer_sum)
-    win_tracker(player_sum, dealer_sum, player_wins, dealer_wins)
-    if game_over?(player_wins, dealer_wins)
-      next
+    win = win_tracker(player_sum, dealer_sum)
+    tally_wins.merge!(win) { |_, score1, score2| score1 + score2 }
+    if tally_wins.has_value?(5)
+      winning_message(tally_wins)
+      break
     else
-      prompt "Your win count is #{player_wins.count} vs
-               #{dealer_wins.count} for dealer"
+      prompt "Your wins: #{tally_wins[:plyr]} vs #{tally_wins[:dlr]} for dealer"
       play_again? ? next : break
     end
   end
 
   show_final_hands(player_cards, dealer_cards)
   show_results(player_sum, dealer_sum)
-  win_tracker(player_sum, dealer_sum, player_wins, dealer_wins)
-  if game_over?(player_wins, dealer_wins)
-    next
+  win = win_tracker(player_sum, dealer_sum)
+    tally_wins.merge!(win) { |_, score1, score2| score1 + score2 }
+  if tally_wins.has_value?(5)
+    winning_message(tally_wins)
+    break
   else
-    prompt "Your win count: #{player_wins.count} vs
-             #{dealer_wins.count} for dealer"
+    prompt "Your wins: #{tally_wins[:plyr]} vs #{tally_wins[:dlr]} for dealer"
     play_again? ? next : break
   end
 end # main game loop
