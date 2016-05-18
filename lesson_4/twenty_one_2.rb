@@ -142,7 +142,7 @@ def play_again?
 end
 
 def winning_message(tally)
-  winner = tally.max_by {|_, score| score}[0].to_s
+  winner = tally.max_by { |_, score| score }[0].to_s
   if winner.start_with?('p')
     prompt "You WIN the game by #{tally[:plyr]} to #{tally[:dlr]}"
   else
@@ -156,15 +156,12 @@ end
 
 # START
 prompt "Welcome to Twenty - One.  Here are the cards"
-player_wins = []
-dealer_wins = []
-tally_wins = {plyr: 0, dlr: 0}
+tally_wins = { plyr: 0, dlr: 0 }
 
 loop do
   player_cards = []
   dealer_cards = []
   deck = []
-
 
   deck = shuffle_deck
   deal_initial_hand(player_cards, dealer_cards, deck)
@@ -197,7 +194,7 @@ loop do
     show_results(player_sum, dealer_sum)
     win = win_tracker(player_sum, dealer_sum)
     tally_wins.merge!(win) { |_, score1, score2| score1 + score2 }
-    if tally_wins.has_value?(5)
+    if tally_wins.value?(5)
       winning_message(tally_wins)
       break
     else
@@ -221,7 +218,7 @@ loop do
     show_results(player_sum, dealer_sum)
     win = win_tracker(player_sum, dealer_sum)
     tally_wins.merge!(win) { |_, score1, score2| score1 + score2 }
-    if tally_wins.has_value?(5)
+    if tally_wins.value?(5)
       winning_message(tally_wins)
       break
     else
@@ -233,8 +230,8 @@ loop do
   show_final_hands(player_cards, dealer_cards)
   show_results(player_sum, dealer_sum)
   win = win_tracker(player_sum, dealer_sum)
-    tally_wins.merge!(win) { |_, score1, score2| score1 + score2 }
-  if tally_wins.has_value?(5)
+  tally_wins.merge!(win) { |_, score1, score2| score1 + score2 }
+  if tally_wins.value?(5)
     winning_message(tally_wins)
     break
   else
