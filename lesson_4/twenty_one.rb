@@ -26,41 +26,27 @@ end
 
 def get_total(hand)
   sum = 0
-  hand.each do |e|
-    e = e[0]
-    value = case e
+  hand.each do |rank, _|
+    value = case rank
             when 'A'
-              1
-            when '1'
-              1
-            when '2'
-              2
-            when '3'
-              3
-            when '4'
-              4
-            when '5'
-              5
-            when '6'
-              6
-            when '7'
-              7
-            when '8'
-              8
-            when '9'
-              9
+              11
+            when '2'..'9'
+              rank.to_i
             else
               10
             end
     sum += value
   end
+  #correct for Aces
+  hand.select { |rank, _| rank == 'A' }.count.times do
+    sum -= 10 if sum > 21
+  end
   sum
 end
 
 def ace_check(hand)
-  hand.each do |e|
-    e = e[0]
-    return true if e == 'A'
+  hand.each do |rank, _|
+    return true if rank == 'A'
   end
   false
 end
@@ -172,7 +158,10 @@ loop do
   game_over = false
 
   deck = shuffle_deck
-  deal_initial_hand(player_cards, dealer_cards, deck)
+  #deal_initial_hand(player_cards, dealer_cards, deck)
+  player_cards = [['A', 'Clubs'], ['A', 'Diamonds']]
+  dealer_cards = [['2', 'Clubs'], ['9', 'Diamonds']]
+  
   show_dealer_initial_hand(dealer_cards)
   show_player_message(player_cards)
   blackjack_player = check_for_blackjack(player_cards)
@@ -229,14 +218,12 @@ loop do
       end
     end
   end
-
+  choice = ''
   prompt "play again?  press y or n"
-  choice = gets.chomp.downcase
-  if choice.start_with? 'n'
-    break
-  elsif choice.start_with? 'y'
-    next
-  else
-    prompt "Enter valid choice"
+  loop do 
+    choice = gets.chomp.downcase
+    break if choice.start_with?('y', 'n')
+      prompt "Enter valid choice y or n"
   end
-end
+  break if choice == 'n'
+end # main game loop
