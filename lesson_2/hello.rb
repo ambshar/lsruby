@@ -1,22 +1,23 @@
 
-def change(b)
-  b << "there"
+PROD = [{p: 300, q: 'thinkpad'}, {p: 200, q: 'thinkpad'}, {p: 200, q: 'dell'}, {p: 450, q: 'thinkpad'}]
+
+
+
+
+def search(query)
+  min = query[:pmin]
+  max = query[:pmax]
+  type = query[:brand]
+  out = []
+ PROD.select do |e|
+    e[:p] <= max && e[:p] >= min && e[:q] == type.downcase
+  end
+  
 end
 
 
 
-a =  "hello"
+out = []
+q = {pmin: 200, pmax: 500, brand: 'Dell'}
 
-puts a
-
-c = change a
-
-puts a
-
-2.times do
-
-a = "there"
-
-end
-
-puts a, c
+p search(q)
