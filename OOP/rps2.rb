@@ -157,7 +157,7 @@ class RPSGame
 
   def play_again?
     puts ""
-    puts ">>>PLAY AGAIN? enter y or n<<<"
+    puts ">>>PLAY AGAIN? y or n? First to score 5 wins <<<"
     choice = nil
     loop do
       choice = gets.chomp

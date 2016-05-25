@@ -1,10 +1,11 @@
-# Keeping score
+# Add Rock Paper Scissors Lizard Spock classes
 class Player
-  attr_accessor :move, :name, :score
+  attr_accessor :move, :name, :score, :total_moves
 
   def initialize
     set_name
     self.score = 0
+    self.total_moves = 0
   end
 end # end Player
 
@@ -23,15 +24,17 @@ class Human < Player
   def choose
     choice = nil
     loop do
-      puts "Choose r (rock), p (paper) or sc (scissors)"
+      puts "Choose r (rock), p (paper) sc (scissors) l (lizard) or s (spock)"
       choice = gets.chomp
 
       if Move::VALID_SHORT_FORMS.key? choice
         choice = Move::VALID_SHORT_FORMS[choice]
       end
+
       break if Move::VALUES.include? choice
     end
-    self.move = Move.new(choice)
+    self.move = Object.const_get(choice.capitalize).new
+    self.total_moves += 1
   end
 end # end Human
 
@@ -43,48 +46,71 @@ class Computer < Player
   end
 
   def choose
-    self.move = Move.new(Move::VALUES.sample)
+    self.move = Object.const_get(Move::VALUES.sample.capitalize).new
+    self.total_moves += 1
   end
 end
 
 class Move
-  VALUES = ['rock', 'paper', 'scissors'].freeze
+  VALUES = ['rock', 'paper', 'scissors', 'spock', 'lizard'].freeze
   VALID_SHORT_FORMS = { "r" => "rock",
                         "p" => "paper",
-                        "sc" => "scissors" }.freeze
+                        "sc" => "scissors",
+                        "s" => "spock",
+                        "l" => "lizard" }.freeze
+  ENCOUNTER_RULES = { rock: [:scissors, :lizard],
+                      paper: [:rock, :spock],
+                      scissors: [:paper, :lizard],
+                      lizard: [:spock, :paper],
+                      spock: [:scissors, :rock] }.freeze
+  attr_reader :value
 
   def initialize(value)
     @value = value
   end
 
-  def scissors?
-    @value == 'scissors'
-  end
-
-  def rock?
-    @value == 'rock'
-  end
-
-  def paper?
-    @value == 'paper'
-  end
-
   def >(other_move)
-    (rock? && other_move.scissors?) ||
-      (paper? && other_move.rock?) ||
-      (scissors? && other_move.paper?)
+    ENCOUNTER_RULES[value.to_sym].include? other_move.value.to_sym
   end
 
   def <(other_move)
-    (rock? && other_move.paper?) ||
-      (paper? && other_move.scissors?) ||
-      (scissors? && other_move.rock?)
+    ENCOUNTER_RULES[other_move.value.to_sym].include? value.to_sym
   end
 
   def to_s
     @value
   end
 end # end Move
+
+class Rock < Move
+  def initialize
+    @value = 'rock'
+  end
+end
+
+class Paper < Move
+  def initialize
+    @value = 'paper'
+  end
+end
+
+class Scissors < Move
+  def initialize
+    @value = 'scissors'
+  end
+end
+
+class Lizard < Move
+  def initialize
+    @value = 'lizard'
+  end
+end
+
+class Spock < Move
+  def initialize
+    @value = 'spock'
+  end
+end
 
 class Rule
   def initialize
@@ -106,11 +132,12 @@ class RPSGame
   end
 
   def display_welcome_message
-    puts "WELCOME to Rock, Paper, Scissors!"
+    puts "WELCOME to Rock, Paper, Scissors, Lizard & Spock!"
+    puts "First one to 5 wins is the winner!"
   end
 
   def display_goodbye_message
-    puts "Thanks for playing Rock Paper Scissors.  Good Bye!"
+    puts "Thanks for playing. First one to score 5 is the winner.  Good Bye!"
   end
 
   def display_moves
@@ -153,12 +180,13 @@ class RPSGame
   end
 
   def win_condition?
-    return true if human.score == 10 || computer.score == 10
+    return true if human.score == 5 || computer.score == 5
     false
   end
 
   def play_again?
-    puts "Play again? enter y or n"
+    puts ""
+    puts ">>>PLAY AGAIN? y or n? First to score 5 wins <<<"
     choice = nil
     loop do
       choice = gets.chomp
@@ -168,6 +196,14 @@ class RPSGame
     choice == 'y' ? true : false
   end
 
+  def add_all_moves
+    human.total_moves + computer.total_moves
+  end
+
+  def clear_screen
+    system 'clear' || 'cls' if add_all_moves % 6 == 0
+  end
+
   def play
     loop do
       human.choose
@@ -175,12 +211,13 @@ class RPSGame
       display_moves
       increment_score
       display_winner
-      if win_condition? || !play_again?
+      if win_condition? || (add_all_moves % 6 == 0 ? !play_again? : false)
         break
       end
+      clear_screen
     end
     display_goodbye_message
   end
-end # end RPSGame
+end
 
 RPSGame.new.play
