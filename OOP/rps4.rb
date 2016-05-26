@@ -1,13 +1,25 @@
-
+# frozen_string_literal: true
 # Track history of moves
 class Player
-  attr_accessor :move, :name, :score, :total_moves, :history
+  attr_accessor :move, :name, :score
 
   def initialize
     set_name
     self.score = 0
-    self.total_moves = 0
-    self.history = []
+    @history = []
+  end
+
+  def update_history
+    size = @history.length
+    @history[size - 1] = @history[size - 1].upcase
+  end
+
+  def history_size
+    @history.size
+  end
+
+  def history_value(i)
+    @history[i]
   end
 end # end Player
 
@@ -16,7 +28,7 @@ class Human < Player
     puts "Your name?"
     n = ''
     loop do
-      n = gets.chomp
+      n = gets.chomp.strip
       break unless n == ""
       puts "please enter a name"
     end
@@ -25,19 +37,14 @@ class Human < Player
 
   def choose
     choice = nil
+    self.move = Move.new
     loop do
       puts "Choose r (rock), p (paper) sc (scissors) l (lizard) or s (spock)"
-      choice = gets.chomp
-
-      if Move::VALID_SHORT_FORMS.key? choice
-        choice = Move::VALID_SHORT_FORMS[choice]
-      end
-
-      break if Move::VALUES.include? choice
+      choice = gets.chomp.downcase.strip
+      break if move.valid?(choice)
     end
-    self.move = Move.new(choice)
-    self.total_moves += 1
-    history << move.value
+    move.value = move.value_for_human(choice)
+    @history << move.value
   end
 end # end Human
 
@@ -49,9 +56,9 @@ class Computer < Player
   end
 
   def choose
-    self.move = Move.new(Move::VALUES.sample)
-    self.total_moves += 1
-    history << move.value
+    self.move = Move.new
+    move.value = move.value_for_computer
+    @history << move.value
   end
 end
 
@@ -67,10 +74,23 @@ class Move
                       scissors: [:paper, :lizard],
                       lizard: [:spock, :paper],
                       spock: [:scissors, :rock] }.freeze
-  attr_reader :value
+  attr_accessor :value
 
-  def initialize(value)
-    @value = value
+  def initialize
+    @value = nil
+  end
+
+  def valid?(input)
+    return true if VALID_SHORT_FORMS.key? input
+    false
+  end
+
+  def value_for_human(input)
+    VALID_SHORT_FORMS[input]
+  end
+
+  def value_for_computer
+    VALUES.sample
   end
 
   def >(other_move)
@@ -85,16 +105,6 @@ class Move
     @value
   end
 end # end Move
-
-class Rule
-  def initialize
-    # not sure what the "state" of a rule object should be
-  end
-end
-
-# not sure where "compare" goes yet
-def compare(move1, move2)
-end
 
 class RPSGame
   attr_accessor :human, :computer
@@ -128,24 +138,25 @@ class RPSGame
   end
 
   def increment_score
-    winner = game_winner
-    if winner == :human
+    case game_winner
+    when :human
       human.score += 1
-    elsif winner == :computer
+    when :computer
       computer.score += 1
     end
   end
 
   def display_winner
-    winner = game_winner
-    if winner == :human
+    case game_winner
+    when :human
       puts "#{human.name} won"
-    elsif winner == :computer
+    when :computer
       puts "#{computer.name} won"
     else
       puts "It's a tie"
     end
     display_scores
+    change_winner_display
     display_history
   end
 
@@ -153,33 +164,32 @@ class RPSGame
     puts ""
     puts "SCORE: #{human.name} -> #{human.score} and "\
           "#{computer.name} -> #{computer.score}"
+    puts ""
+    puts "-------------------------------"
   end
 
   def change_winner_display
-    winner = game_winner
-    size = human.history.length
-    if winner == :human
-      human.history[size - 1] = human.history[size - 1].upcase
-    elsif winner == :computer
-      computer.history[size - 1] = computer.history[size - 1].upcase
+    case game_winner
+    when :human
+      human.update_history
+    when :computer
+      computer.update_history
+    else
+      return
     end
   end
 
   def display_history
-    puts ""
+    puts " #{human.name.capitalize.ljust(15)}  #{computer.name}"
     puts "-------------------------------"
-    puts "   #{human.name}           #{computer.name}"
-    puts "-------------------------------"
-    change_winner_display
-    human.history.each_with_index do |move, i|
-      puts "   #{move}        #{computer.history[i]}"
+    human.history_size.times do |i|
+      puts " #{human.history_value(i).ljust(15)}  #{computer.history_value(i)}"
     end
     puts "-------------------------------"
   end
 
   def win_condition?
-    return true if human.score == 5 || computer.score == 5
-    false
+    human.score == 5 || computer.score == 5
   end
 
   def play_again?
@@ -187,19 +197,19 @@ class RPSGame
     puts ">>>PLAY AGAIN? y or n? First to score 5 wins <<<"
     choice = nil
     loop do
-      choice = gets.chomp
-      break if choice.downcase.start_with?('y', 'n')
+      choice = gets.chomp.downcase
+      break if choice.start_with?('y', 'n')
       puts "Please select from y or n"
     end
     choice == 'y' ? true : false
   end
 
   def add_all_moves
-    human.total_moves + computer.total_moves
+    human.history_size * 2
   end
 
   def clear_screen
-    system 'clear' || 'cls' if add_all_moves % 6 == 0
+    (system 'clear' || 'cls') if add_all_moves % 6 == 0
   end
 
   def play
@@ -209,7 +219,7 @@ class RPSGame
       display_moves
       increment_score
       display_winner
-      if win_condition? || (add_all_moves % 6 == 0 ? !play_again? : false)
+      if win_condition?
         break
       end
       clear_screen
