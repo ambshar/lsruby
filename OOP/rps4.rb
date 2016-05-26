@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 # Track history of moves
+require 'pry'
 class Player
   attr_accessor :move, :name, :score
 
@@ -39,11 +40,13 @@ class Human < Player
     choice = nil
     self.move = Move.new
     loop do
-      puts "Choose r (rock), p (paper) sc (scissors) l (lizard) or s (spock)"
+      puts "Choose r (rock), p (paper) sc (scissors) l (lizard)  s (spock)"
+      puts "       OR q to quit"
       choice = gets.chomp.downcase.strip
-      break if move.valid?(choice)
+      break if Move.valid?(choice)
     end
-    move.value = move.value_for_human(choice)
+    return if choice == "q"
+    move.value = Move.value_for_human(choice)
     @history << move.value
   end
 end # end Human
@@ -57,7 +60,7 @@ class Computer < Player
 
   def choose
     self.move = Move.new
-    move.value = move.value_for_computer
+    move.value = Move.value_for_computer
     @history << move.value
   end
 end
@@ -68,7 +71,8 @@ class Move
                         "p" => "paper",
                         "sc" => "scissors",
                         "s" => "spock",
-                        "l" => "lizard" }.freeze
+                        "l" => "lizard",
+                        "q" => "quit" }.freeze
   ENCOUNTER_RULES = { rock: [:scissors, :lizard],
                       paper: [:rock, :spock],
                       scissors: [:paper, :lizard],
@@ -80,16 +84,16 @@ class Move
     @value = nil
   end
 
-  def valid?(input)
+  def self.valid?(input)
     return true if VALID_SHORT_FORMS.key? input
     false
   end
 
-  def value_for_human(input)
+  def self.value_for_human(input)
     VALID_SHORT_FORMS[input]
   end
 
-  def value_for_computer
+  def self.value_for_computer
     VALUES.sample
   end
 
@@ -180,10 +184,10 @@ class RPSGame
   end
 
   def display_history
-    puts " #{human.name.capitalize.ljust(15)}  #{computer.name}"
+    puts " #{human.name.capitalize.ljust(15)}#{computer.name}"
     puts "-------------------------------"
     human.history_size.times do |i|
-      puts " #{human.history_value(i).ljust(15)}  #{computer.history_value(i)}"
+      puts " #{human.history_value(i).ljust(13)}  #{computer.history_value(i)}"
     end
     puts "-------------------------------"
   end
@@ -201,7 +205,7 @@ class RPSGame
       break if choice.start_with?('y', 'n')
       puts "Please select from y or n"
     end
-    choice == 'y' ? true : false
+    choice == 'y'
   end
 
   def add_all_moves
@@ -209,12 +213,14 @@ class RPSGame
   end
 
   def clear_screen
-    (system 'clear' || 'cls') if add_all_moves % 6 == 0
+    if add_all_moves % 6 == 0
+      (system 'cls').nil? ? (system 'clear') : (system 'cls')
+    end
   end
 
   def play
     loop do
-      human.choose
+      break if human.choose.nil?
       computer.choose
       display_moves
       increment_score
