@@ -36,3 +36,28 @@ class Motorcycle < WheeledVehicle
     super([20,20], 80, 8.0)
   end
 end
+
+class Catamaran
+  include Moveable
+
+  attr_accessor :propeller_count, :hull_count
+
+  def initialize(num_propellers, num_hulls, km_traveled_per_liter, liters_of_fuel_capacity)
+    self.fuel_efficiency = km_traveled_per_liter
+    self.fuel_capacity = liters_of_fuel_capacity
+
+    # ... other code to track catamaran-specific data omitted ...
+  end
+end
+
+class Motorboat < Catamaran
+  def initialize(km_traveled_per_liter, liters_of_fuel_capacity)
+    self.fuel_efficiency = km_traveled_per_liter
+    self.fuel_capacity = liters_of_fuel_capacity
+    @propeller_count = 1
+    @hull_count = 1
+
+    # ... other code to track catamaran-specific data omitted ...
+  end
+
+end
