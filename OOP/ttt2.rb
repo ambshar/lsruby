@@ -152,16 +152,33 @@ end # end Player
 class TTTGame
   HUMAN_MARKER = 'X'
   COMPUTER_MARKER = 'O'
-  FIRST_TO_MOVE = HUMAN_MARKER
+  
 
   attr_reader :board, :human, :computer
 
   def initialize
     @board = Board.new
-    @human = Player.new(HUMAN_MARKER)
-    @computer = Player.new(COMPUTER_MARKER)
-    @current_marker = FIRST_TO_MOVE
-    @games_played = 0
+    @human_marker = ask_for_marker
+    @human = Player.new(@human_marker)
+    @computer_marker = select_computer_marker
+    @computer = Player.new(@computer_marker)
+    @first_to_move = @human_marker
+    @current_marker = @first_to_move
+  end
+
+  def ask_for_marker
+    puts "Choose a marker.  One letter only."
+    loop do
+      marker = gets.chomp.strip.upcase
+      return marker if marker.size == 1
+      puts "Invalid choice.  One letter only."
+    end
+  end
+
+  def select_computer_marker
+    alpha = ('A'..'Z').to_a
+    alpha.delete(@human_marker)
+    alpha.sample
   end
 
   def display_welcome_message
@@ -179,7 +196,7 @@ class TTTGame
   end
 
   def display_board
-    puts "You are an #{HUMAN_MARKER} and computer is an #{COMPUTER_MARKER}"
+    puts "You are #{@human_marker} and computer is #{@computer_marker}"
     puts ""
     puts ""
     board.draw
@@ -202,10 +219,10 @@ class TTTGame
   end
 
   def checking_markers
-    return board.if_two_in_a_row(COMPUTER_MARKER) if !board.if_two_in_a_row(
-      COMPUTER_MARKER).nil?
-    return board.if_two_in_a_row(HUMAN_MARKER) if !board.if_two_in_a_row(
-      HUMAN_MARKER).nil?
+    return board.if_two_in_a_row(@computer_marker) if !board.if_two_in_a_row(
+      @computer_marker).nil?
+    return board.if_two_in_a_row(@human_marker) if !board.if_two_in_a_row(
+      @human_marker).nil?
     return 5 if board[5].unmarked?
     nil
   end
@@ -225,10 +242,10 @@ class TTTGame
 
     case board.winning_marker
 
-    when HUMAN_MARKER
+    when @human_marker
       human.wins += 1
       puts "YOU won."
-    when COMPUTER_MARKER
+    when @computer_marker
       computer.wins += 1
       puts "Computer won."
     else
@@ -250,7 +267,7 @@ class TTTGame
 
   def reset
     board.reset
-    @current_marker = FIRST_TO_MOVE
+    @current_marker = @first_to_move
     clear_screen
   end
 
@@ -260,12 +277,12 @@ class TTTGame
   end
 
   def current_marker_moves
-    if @current_marker == HUMAN_MARKER
+    if @current_marker == @human_marker
       human_moves
-      @current_marker = COMPUTER_MARKER
+      @current_marker = @computer_marker
     else
       computer_moves
-      @current_marker = HUMAN_MARKER
+      @current_marker = @human_marker
     end
   end
 
@@ -276,7 +293,6 @@ class TTTGame
   def play
     display_welcome_message
     loop do
-      @games_played += 1
       display_board
       loop do
         current_marker_moves

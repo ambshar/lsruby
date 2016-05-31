@@ -140,13 +140,35 @@ class Square
 end # end Square
 
 class Player
-  attr_reader :marker
+  attr_reader :marker, :name
   attr_accessor :wins
   def initialize(marker)
     @marker = marker
     @wins = 0
+    set_name
   end
 end # end Player
+
+class Human < Player
+  def set_name
+    puts "Your name?"
+    n = ''
+    loop do
+      n = gets.chomp.downcase.strip
+      break unless n == ""
+      puts "please enter a name"
+    end
+    @name = n.capitalize
+  end
+end
+
+class Computer < Player
+  def set_name
+    @name = ['R2D2', 'Hal', 'Rover', 'Kit'].sample
+    puts "You will be playing against #{name}"
+    sleep 0.5
+  end
+end
 
 class TTTGame
   HUMAN_MARKER = 'X'
@@ -156,11 +178,11 @@ class TTTGame
   attr_reader :board, :human, :computer
 
   def initialize
+    display_welcome_message
     @board = Board.new
-    @human = Player.new(HUMAN_MARKER)
-    @computer = Player.new(COMPUTER_MARKER)
+    @human = Human.new(HUMAN_MARKER)
+    @computer = Computer.new(COMPUTER_MARKER)
     @current_marker = FIRST_TO_MOVE
-    @games_played = 0
   end
 
   def display_welcome_message
@@ -178,7 +200,8 @@ class TTTGame
   end
 
   def display_board
-    puts "You are an #{HUMAN_MARKER} and computer is an #{COMPUTER_MARKER}"
+    puts "#{human.name} is an #{HUMAN_MARKER} and #{computer.name} is " \
+           + "an #{COMPUTER_MARKER}"
     puts ""
     puts ""
     board.draw
@@ -219,21 +242,30 @@ class TTTGame
     end
   end
 
+  def update_wins
+    case board.winning_marker
+    when HUMAN_MARKER
+      human.wins += 1
+    when COMPUTER_MARKER
+      computer.wins += 1
+    end
+  end
+
   def display_result
     clear_screen_and_display_board
+    update_wins
 
     case board.winning_marker
 
     when HUMAN_MARKER
-      human.wins += 1
-      puts "YOU won."
+      puts "#{human.name} won."
     when COMPUTER_MARKER
-      computer.wins += 1
-      puts "Computer won."
+      puts "#{computer.name} won."
     else
       puts "the board is full"
     end
-    puts "SCORE: You: #{human.wins}, Computer: #{computer.wins}"
+    puts "SCORE: #{human.name} - #{human.wins}, #{computer.name} -"\
+    + " #{computer.wins}"
   end
 
   def play_again?
@@ -273,9 +305,7 @@ class TTTGame
   end
 
   def play
-    display_welcome_message
     loop do
-      @games_played += 1
       display_board
       loop do
         current_marker_moves
