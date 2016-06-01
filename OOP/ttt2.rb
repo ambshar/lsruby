@@ -141,27 +141,45 @@ class Square
 end # end Square
 
 class Player
-  attr_reader :marker
+  attr_reader :marker, :name
   attr_accessor :wins
   def initialize(marker)
     @marker = marker
     @wins = 0
+    set_name
   end
 end # end Player
 
-class TTTGame
-  HUMAN_MARKER = 'X'
-  COMPUTER_MARKER = 'O'
-  
+class Human < Player
+  def set_name
+    puts "Your name?"
+    n = ''
+    loop do
+      n = gets.chomp.downcase.strip
+      break unless n == ""
+      puts "please enter a name"
+    end
+    @name = n.capitalize
+  end
+end
 
+class Computer < Player
+  def set_name
+    @name = ['R2D2', 'Hal', 'Rover', 'Kit'].sample
+    puts "You will be playing against #{name}"
+    sleep 0.5
+  end
+end
+
+class TTTGame
   attr_reader :board, :human, :computer
 
   def initialize
     @board = Board.new
     @human_marker = ask_for_marker
-    @human = Player.new(@human_marker)
+    @human = Human.new(@human_marker)
     @computer_marker = select_computer_marker
-    @computer = Player.new(@computer_marker)
+    @computer = Computer.new(@computer_marker)
     @first_to_move = @human_marker
     @current_marker = @first_to_move
   end
@@ -196,7 +214,8 @@ class TTTGame
   end
 
   def display_board
-    puts "You are #{@human_marker} and computer is #{@computer_marker}"
+    puts "#{human.name} is an #{@human_marker} and #{computer.name} is " \
+           + "an #{@computer_marker}"
     puts ""
     puts ""
     board.draw
@@ -237,21 +256,30 @@ class TTTGame
     end
   end
 
+  def update_wins
+    case board.winning_marker
+    when @human_marker
+      human.wins += 1
+    when @computer_marker
+      computer.wins += 1
+    end
+    puts "SCORE: #{human.name} - #{human.wins}, #{computer.name} -"\
+    + " #{computer.wins}"
+  end
+
   def display_result
     clear_screen_and_display_board
 
     case board.winning_marker
 
     when @human_marker
-      human.wins += 1
-      puts "YOU won."
+      puts "#{human.name} won."
     when @computer_marker
-      computer.wins += 1
-      puts "Computer won."
+      puts "#{computer.name} won."
     else
       puts "the board is full"
     end
-    puts "SCORE: You: #{human.wins}, Computer: #{computer.wins}"
+    update_wins
   end
 
   def play_again?
