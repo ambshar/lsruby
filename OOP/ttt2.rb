@@ -47,18 +47,6 @@ class Board
     !!winning_marker
   end
 
-  def count_human_marker(squares) #  array of square objects
-    squares.collect(&:marker).count(TTTGame::HUMAN_MARKER)
-  end
-
-  def count_computer_marker(squares)
-    squares.collect(&:marker).count(TTTGame::COMPUTER_MARKER)
-  end
-
-  def count_markers(squares)
-    squares.map(&:marker).uniq.length
-  end
-
   def winning_marker
     WINNING_LINES.each do |line|
       squares = @squares.values_at(*line)
@@ -77,7 +65,7 @@ class Board
     joinor(unmarked_keys)
   end
 
-  def if_two_in_a_row(marker) # find winning lines with two human markers
+  def check_for_offense_or_defense(marker)
     choose_squares = []
     WINNING_LINES.each do |line|
       squares = @squares.values_at(*line)
@@ -86,7 +74,7 @@ class Board
 
       choose_squares = marked_sq.select do |sq|
         sq.marker if sq.square_with(marker)
-      end # get squares with human markers
+      end
 
       if choose_squares.size == marked_sq.size
         return line[chosen_square_index(squares)]
@@ -110,7 +98,7 @@ class Board
 
   def chosen_square_index(squares)
     lines = squares.each_with_index.map { |sq, idx| idx if sq.unmarked? }
-    lines.select { |e| e if !e.nil? }[0] # returns indx of empty square in line
+    lines.select { |e| e if !e.nil? }[0] # returns indx of unmarked square in line
   end
 end # end Board
 
@@ -235,17 +223,15 @@ class TTTGame
     board[square] = human.marker
   end
 
-  def checking_markers
-    return board.if_two_in_a_row(@computer_marker) if !board.if_two_in_a_row(
-      @computer_marker).nil?
-    return board.if_two_in_a_row(@human_marker) if !board.if_two_in_a_row(
-      @human_marker).nil?
-    return 5 if board[5].unmarked?
-    nil
+def find_square_for_computer
+    square = board.check_for_offense_or_defense(@computer_marker) ||
+             board.check_for_offense_or_defense(@human_marker)
+    square ||= 5 if board[5].unmarked?
+    square
   end
 
   def computer_moves
-    choice = checking_markers
+    choice = find_square_for_computer
     case choice
     when nil
       board[board.unmarked_keys.sample] = computer.marker
