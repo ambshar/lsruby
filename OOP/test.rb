@@ -1,63 +1,45 @@
-module Transportable
-  def range(km_traveled_per_liter, liters_of_fuel_capacity)
-    km_traveled_per_liter * liters_of_fuel_capacity
+# method implementation
+class Multiply
+  attr_reader :value
+  def initialize(number)
+    @value = number
+  end
+  def test
+    yield(value, value**2)                              # passing 1 block argument at block invocation time
   end
 end
 
-class WheeledVehicle
-  attr_accessor :speed, :heading
-  include Transportable
+a = Multiply.new(3)
 
-  def initialize(tire_array, km_traveled_per_liter, liters_of_fuel_capacity)
-    @tires = tire_array
-    @fuel_efficiency = km_traveled_per_liter
-    @fuel_capacity = liters_of_fuel_capacity
-  end
-
-  def tire_pressure(tire_index)
-    @tires[tire_index]
-  end
-
-  def inflate_tire(tire_index, pressure)
-    @tires[tire_index] = pressure
-  end
+# method invocation
+c = 5
+a.test do |num1, num2|                    # expecting 2 parameters in block implementation
+  b = num1*num2 + c
+  puts "#{b}"
 end
 
-class Auto < WheeledVehicle
-  def initialize
-    # 4 tires are various tire pressures
-    super([30,30,32,32], 50, 25.0)
-  end
+
+
+def test2(&block)
+  puts "What's &block? #{block}"
+  puts block.class
 end
 
-class Motorcycle < WheeledVehicle
-  def initialize
-    # 2 tires are various tire pressures along with
-    super([20,20], 80, 8.0)
-  end
-end
+test2 {2}
 
-class Catamaran
-  include Moveable
 
-  attr_accessor :propeller_count, :hull_count
 
-  def initialize(num_propellers, num_hulls, km_traveled_per_liter, liters_of_fuel_capacity)
-    self.fuel_efficiency = km_traveled_per_liter
-    self.fuel_capacity = liters_of_fuel_capacity
+  def times number
 
-    # ... other code to track catamaran-specific data omitted ...
-  end
-end
-
-class Motorboat < Catamaran
-  def initialize(km_traveled_per_liter, liters_of_fuel_capacity)
-    self.fuel_efficiency = km_traveled_per_liter
-    self.fuel_capacity = liters_of_fuel_capacity
-    @propeller_count = 1
-    @hull_count = 1
-
-    # ... other code to track catamaran-specific data omitted ...
+    for i in 0..(number-1)
+      yield(i)
+    end
+    number
   end
 
+
+
+
+times(5) do |num|
+  puts num
 end
