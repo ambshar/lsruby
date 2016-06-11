@@ -1,4 +1,4 @@
-require 'pry'
+# frozen_string_literal: true
 class Robot
   @@names = []
 
@@ -17,16 +17,13 @@ class Robot
 
       next if @@names.include? @name
       @@names << @name
-    
+
       break
     end
     @name
   end
 
   def reset
-    @@names.delete_if {|name| name == @name}
+    @@names.delete_if { |name| name == @name }
   end
-
-
 end
-
