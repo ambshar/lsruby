@@ -1,29 +1,39 @@
 # frozen_string_literal: true
+require 'pry'
 class Robot
-  @@names = []
-
-  def initialize
-    @name = ''
-  end
+  @all_names = []
 
   def name
-    return @name if @@names.include? @name
-
-    loop do
-      num = rand 100...1000
-      alpha = Array('A'..'Z').sample + Array('A'..'Z').sample
-
-      @name = alpha + num.to_s
-
-      next if @@names.include? @name
-      @@names << @name
-
-      break
-    end
-    @name
+    @name ||= generate_name
   end
+
+  def generate_name
+    name = alpha + numbers
+    if Robot.all_names.include? name
+      name = generate_name
+    else
+      Robot.all_names << name
+    end
+    name
+  end
+
+  def alpha
+    Array('A'..'Z').sample + Array('A'..'Z').sample
+  end
+
+  def numbers
+    ('000'..'999').to_a.sample
+  end
+
+  def self.all_names
+    @all_names
+  end
+
 
   def reset
-    @@names.delete_if { |name| name == @name }
+    @name = nil
   end
 end
+
+r = Robot.new
+puts r.name

@@ -4,7 +4,7 @@ def generate_fibonacci_series(num)
 
   num.times do |n|
     output << fibonacci(n) 
-    p n
+    
   end
 output
 end
@@ -17,8 +17,9 @@ end
 
 def select_array(arr)
   output = []
+  fibonacci_series = generate_fibonacci_series(arr.size)
   arr.each_with_index do |e, idx|
-    if generate_fibonacci_series(10).include?(idx)
+    if fibonacci_series.include?(idx)
       output << e
     end
 
@@ -34,4 +35,4 @@ array = [3, 5, 77, 2, 1, 0, 33, 6, 10, 23, 101]
 p array
 
 
-#p select_array(array)
+p select_array(array)
