@@ -1,4 +1,4 @@
-require 'pry'
+
 
 def record_all_data(bst)
     all_data = []
@@ -14,10 +14,6 @@ class Bst
     @left = nil
     @right = nil
   end
-
-
-
-
 
   def insert(num)
     if num <= self.data
@@ -39,12 +35,3 @@ class Bst
 
 
 end
-
-four = Bst.new 4
-
-p four.data
-four.insert 2
-
-four.insert 6
-
-p record_all_data(four)
