@@ -1,11 +1,4 @@
 
-
-def record_all_data(bst)
-    all_data = []
-    bst.each { |data| all_data << data }
-    all_data
-  end
-
 class Bst
   attr_reader :data
   attr_accessor :left, :right
